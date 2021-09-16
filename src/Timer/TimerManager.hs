@@ -2,7 +2,7 @@ module Timer.TimerManager where
 
 import Control.Concurrent.MVar (newEmptyMVar)
 import Control.Monad (when)
-import System.Console.ANSI (hideCursor, showCursor)
+import System.Console.ANSI (clearLine, hideCursor, showCursor)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, hSetEcho, stdin)
 import System.Posix.Signals (installHandler, sigINT)
 
@@ -49,6 +49,7 @@ startTimerManager barType w b l = do
                             | otherwise = sessionNum
           timerManager newSessionNum w b l secRemaining
         _ -> do
+          clearLine
           showCursor
           hSetEcho stdin True
           updateBar "POMODORO" 'i' barType
