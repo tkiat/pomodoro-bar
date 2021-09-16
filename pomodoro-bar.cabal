@@ -1,0 +1,54 @@
+cabal-version:       3.0
+name:                pomodoro-bar
+version:             0.1.0.0
+
+synopsis:            A pausable and configurable pomodoro timer with stats for X Window System.
+license:             GPL-2.0-only
+
+author:              Theerawat Kiatdarakun
+copyright:           Theerawat Kiatdarakun
+maintainer:          tkiat@tutanota.com
+
+build-type:          Simple
+
+library
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  exposed-modules:     Common
+                       PomodoroBar
+                       Record.Date
+                       Record.Record
+                       Timer.Bar
+                       Timer.Cli
+                       Timer.NamedPipe
+                       Timer.Timer
+                       Timer.TimerManager
+  ghc-options:         -Wall -fno-warn-name-shadowing
+  build-depends:       base >= 4.11 && < 5
+                       , ansi-terminal
+                       , aeson
+                       , bytestring
+                       , containers
+                       , directory
+                       , filepath
+                       , optparse-applicative
+                       , time
+                       , unix
+
+executable pomodoro-bar
+  main-is:            Main.hs
+  hs-source-dirs:     app
+  default-language:   Haskell2010
+  ghc-options:        -threaded -O2
+  build-depends:      base
+                    , pomodoro-bar
+
+test-suite pomodoro-bar-tests
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  main-is:          Main.hs
+  default-language: Haskell2010
+  ghc-options:      -Wall -threaded
+  build-depends:    base >=4.11 && < 5
+                  , pomodoro-bar
+                  , hedgehog
