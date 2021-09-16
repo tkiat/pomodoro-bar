@@ -92,14 +92,14 @@ showRecordLast4Weeks workSessionMin = do
       path <- recordPath
       putStr $ path ++ " is not a valid JSON\n" ++ err
     Right rec -> do
-      putStr $ "Number of Sessions, " ++ show workSessionMin ++ " Minutes Each (Mon - Sun)"
-      putStr "\nThis Week      : "
+      putStr $ "Number of Sessions, " ++ show workSessionMin ++ " Minutes Each (Mon - Sun)\n"
+      putStr "This Week      : "
       searchAndShowWeek rec 1
-      putStr "\nLast Week      : "
+      putStr "Last Week      : "
       searchAndShowWeek rec 2
-      putStr "\nTwo Weeks Ago  : "
+      putStr "Two Weeks Ago  : "
       searchAndShowWeek rec 3
-      putStr "\nThree Weeks Ago: "
+      putStr "Three Weeks Ago: "
       searchAndShowWeek rec 4
   where
     searchAndShowWeek :: Record -> Integer -> IO ()
@@ -110,7 +110,7 @@ showRecordLast4Weeks workSessionMin = do
           case n of
             1 -> offsetFromThisMonday >>= showWeek wk workSessionMin . (+) 1
             _ -> showWeek wk workSessionMin 7
-        Nothing -> putStr "--- No Entry ---"
+        Nothing -> putStrLn "--- No Entry ---"
       where
         divideToOneDecimalDigit :: Int -> Int -> Double
         divideToOneDecimalDigit a b = fromInteger ((round :: Double -> Integer) (fromIntegral a/fromIntegral b * 10)) / 10.0
@@ -123,7 +123,7 @@ showRecordLast4Weeks workSessionMin = do
             sessionWeek = [show $ divideToOneDecimalDigit x w| x <- weekWorkload]
             avgPerDay = divideToOneDecimalDigit (sum weekWorkload) (w * length weekWorkload)
           in
-            putStr $ "[" ++ intercalate ", " sessionWeek ++ "] Avg: " ++ show avgPerDay
+            putStrLn $ "[" ++ intercalate ", " sessionWeek ++ "] Avg: " ++ show avgPerDay
 
 showRecordRaw :: IO ()
-showRecordRaw = recordPath >>= readFile >>= putStr
+showRecordRaw = recordPath >>= readFile >>= putStrLn

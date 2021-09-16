@@ -49,7 +49,6 @@ startTimerManager barType w b l = do
                             | otherwise = sessionNum
           timerManager newSessionNum w b l secRemaining
         _ -> do
-          clearLine
           showCursor
           hSetEcho stdin True
           updateBar "POMODORO" 'i' barType

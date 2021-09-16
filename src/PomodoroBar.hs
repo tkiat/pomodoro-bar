@@ -4,11 +4,8 @@
 
 module PomodoroBar where
 
-import Data.List (elem, intersect, isInfixOf, isSuffixOf)
-import Data.Semigroup ((<>))
 import Options.Applicative
-import System.Environment (getArgs)
-import System.Exit (ExitCode ( ExitFailure ), exitWith)
+import System.Console.ANSI (clearLine)
 
 import Record.Record (ensureRecordExist, showRecordRaw, showRecordLast4Weeks)
 import Timer.TimerManager (startTimerManager)
@@ -25,7 +22,7 @@ data Argument = Argument
   }
 
 pomodoroBar :: IO ()
-pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs
+pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs >> clearLine
   where
     opts = info (myArguments <**> helper)
       ( fullDesc
@@ -33,12 +30,12 @@ pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs
      <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats for X Window System" )
 
 parseArgs :: Argument -> IO ()
+parseArgs (Argument _ _ _ True _ _ _ _) = showRecordRaw
+parseArgs (Argument w _ _ False True _ _ _) = showRecordLast4Weeks w
+parseArgs (Argument _ _ _ False False True _ _) = showVersion
 parseArgs (Argument w b l False False False False False) = startTimerManager '-' w b l
 parseArgs (Argument w b l False False False True False) = startTimerManager 'p' w b l
 parseArgs (Argument w b l False False False False True) = startTimerManager 'm' w b l
-parseArgs (Argument w b l True False False False False) = showRecordRaw
-parseArgs (Argument w b l False True False False False) = showRecordLast4Weeks w
-parseArgs (Argument w b l False False True False False) = showVersion
 parseArgs _ = return ()
 
 myArguments :: Parser Argument
