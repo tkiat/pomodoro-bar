@@ -14,6 +14,8 @@ data Argument = Argument
   { work :: Int
   , break :: Int
   , longbreak :: Int
+  , cmdwork :: String
+  , cmdbreak :: String
   , raw :: Bool
   , record :: Bool
   , version :: Bool
@@ -30,12 +32,12 @@ pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs >> clearLine
      <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats for X Window System" )
 
 parseArgs :: Argument -> IO ()
-parseArgs (Argument _ _ _ True _ _ _ _) = showRecordRaw
-parseArgs (Argument w _ _ False True _ _ _) = showRecordLast4Weeks w
-parseArgs (Argument _ _ _ False False True _ _) = showVersion
-parseArgs (Argument w b l False False False False False) = startTimerManager '-' w b l
-parseArgs (Argument w b l False False False True False) = startTimerManager 'p' w b l
-parseArgs (Argument w b l False False False False True) = startTimerManager 'm' w b l
+parseArgs (Argument _ _ _ _  _  True _ _ _ _) = showRecordRaw
+parseArgs (Argument w _ _ _  _  False True _ _ _) = showRecordLast4Weeks w
+parseArgs (Argument _ _ _ _  _  False False True _ _) = showVersion
+parseArgs (Argument w b l cw cb False False False False False) = startTimerManager w b l '-' cw cb
+parseArgs (Argument w b l cw cb False False False True False) = startTimerManager w b l 'p' cw cb
+parseArgs (Argument w b l cw cb False False False False True) = startTimerManager w b l 'm' cw cb
 parseArgs _ = return ()
 
 myArguments :: Parser Argument
@@ -61,6 +63,14 @@ myArguments = Argument
       <> showDefault
       <> value 15
       <> metavar "INT")
+  <*> strOption
+      ( long "cmdwork"
+      <> metavar "COMMAND"
+      <> help "System command to execute when work session ends (e.g. \"xset dpms force off\")" )
+  <*> strOption
+      ( long "cmdbreak"
+      <> metavar "COMMAND"
+      <> help "System command to execute when break session ends (without skipping)" )
   <*> switch
       ( long "raw"
       <> help "show raw record (in minutes)")

@@ -19,7 +19,7 @@ startTimer v prefix suffix prefixBar timerSessionCode barType sec = do
   case val of
     Just _ -> case timerSessionCode of
       'w' -> updateBar ("[P]" ++ timerValue) 'i' barType >> return sec
-      _ -> return 0
+      _ -> return (-1)
     Nothing -> do
       if sec > 0
         then startTimer v prefix suffix prefixBar timerSessionCode barType (sec - 1)

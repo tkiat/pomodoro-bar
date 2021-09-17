@@ -4,6 +4,7 @@ import Control.Concurrent.MVar (newEmptyMVar)
 import Control.Monad (when)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, stdin)
 import System.Posix.Signals (installHandler, sigINT)
+import System.Process (callCommand)
 
 import Common (getHHMMSS, loopUntilGetChars, sigIntInnerHandler)
 import Record.Record (addNewSessionToRecord)
@@ -11,8 +12,8 @@ import Timer.Bar (ensureNamedPipesExist, updateBar)
 import Timer.Cli (getDuration, getKeysHint, getProgressBar, updateCli)
 import Timer.Timer (startTimer)
 
-startTimerManager :: Char -> Int -> Int -> Int -> IO ()
-startTimerManager barType w b l = do
+startTimerManager :: Int -> Int -> Int -> Char -> String -> String -> IO ()
+startTimerManager w b l barType cmdW cmdB = do
   ensureNamedPipesExist barType
 
   hSetBuffering stdin NoBuffering
@@ -41,10 +42,13 @@ startTimerManager barType w b l = do
           _ <- installHandler sigINT (sigIntInnerHandler sub) Nothing
           let prefixBar = "[" ++ show sessionNumRem ++ "]"
           secRemaining <- startTimer sub progressBar (getKeysHint timerSessionCode) prefixBar timerSessionCode barType duration
-          when (secRemaining == 0 && timerSessionCode == 'w') (addNewSessionToRecord w)
-          let newSessionNum | secRemaining == 0 = sessionNum + 1
-                            | otherwise = sessionNum
-          timerManager newSessionNum w b l secRemaining
+          when (secRemaining == 0 && timerSessionCode == 'w') (callCommand cmdW >> addNewSessionToRecord w)
+          when (secRemaining == 0 && (timerSessionCode == 'b' || timerSessionCode == 'l')) (callCommand cmdB)
+          let newSessionNum | secRemaining > 0 = sessionNum
+                            | otherwise = sessionNum + 1
+          let newSecRemaining | secRemaining == (-1) = 0 -- (-1) means user skip break
+                              | otherwise = secRemaining
+          timerManager newSessionNum w b l newSecRemaining
         _ -> do
           updateBar "POMODORO" 'i' barType
 
