@@ -1,6 +1,6 @@
 -- TODO press s repeatly not good
--- TODO stuck at getchar both sigINT handler and CTRL+Z
--- TODO prevent store float in record, also changes this for python
+-- TODO stuck at getchar sigINT handler
+-- TODO refractor CLI like move to display
 
 module PomodoroBar where
 

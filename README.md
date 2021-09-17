@@ -12,6 +12,7 @@ A CLI pomorodo clock based on Haskell and nix. I made this because I couldn't fi
 
 ## What do you need?
 
+- Linux (I have't tested on other systems)
 - nix to install this app (optional but recommended)
 - System command(s) to notify you when session ends like `xset` or `espeak` (optional but recommended)
 
@@ -31,8 +32,9 @@ nix-env -i ./result
 
 ```bash
 pomodoro-bar -h
-echo "My example commands"
+echo "Example command"
 pomodoro-bar -w 25 -b 5 -l 15 --cmdwork "xset dpms force off" --cmdbreak "xset dpms force off" --xmobar
+echo "View record"
 pomodoro-bar --record -w 25
 ```
 
@@ -96,7 +98,6 @@ And add these modules to your bar.
 ```ini
 [bar/whatever]
 modules-right = whatever working resting whatever
-
 ```
 
 After this initial setup, you can restart the window manager or simply recompile polybar.
