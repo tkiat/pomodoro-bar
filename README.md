@@ -1,22 +1,36 @@
 # pomodoro-bar
 
-A CLI pomorodo clock based on Haskell and nix. I made this because I couldn't find any Pomodoro Timer with these exact features.
+A CLI pomorodo clock based on Haskell and nix. I made this because I couldn't find any Pomodoro Timer with these exact features. Visit [pomodoro-bar-py](https://github.com/tkiat/pomodoro-bar-py) for the equivalent single Python script alternative.
 
 ## Features
 
 - Pausable
 - Configurable session lengths
-- Report simple statistics in both raw and pretty formats
-- Run any system command when work and break sessions end
-- Have an integration with polybar and xmobar with distinctly different colors for work and break sessions
+- Report simple stats in both raw and pretty formats
+- Choose any system command to execute when sessions end
+- Integration with polybar and xmobar with alternate colors between work and break sessions
 
-## What do you need?
+## Samples
+
+```
+CLI Display                                   Bar Display / Color
+
+N/A                                           POMODORO / Yellow
+[w]-b-w-b-w-b-w-l 25:00 - [s]tart or [q]uit   [1]START / Yellow
+[w]-b-w-b-w-b-w-l 23:45 - CTRL+c to Pause     [1]23:45 / Green
+[w]-b-w-b-w-b-w-l 23:34 - [s]tart or [q]uit   [P]23:34 / Yellow
+w-[b]-w-b-w-b-w-l 05:00 - [s]tart or [q]uit   [2]BREAK / Yellow
+w-[b]-w-b-w-b-w-l 04:32 - CTRL+c to Skip      [2]04:32 / Yellow
+w-b-[w]-b-w-b-w-l 12:34 - CTRL+c to Pause     [3]12:34 / Green
+```
+
+## Prerequisites
 
 - Linux (I have't tested on OSX, I don't think it works on Windows)
 - nix to install this app (optional but recommended)
 - System command(s) to notify you when session ends like `xset` or `espeak` (optional but recommended)
 
-## How to Install
+## Installation
 
 ### Using nix
 
@@ -26,7 +40,7 @@ nix-build --attr exe
 nix-env -i ./result
 ```
 
-## How to use
+## Usage
 
 ### General
 
