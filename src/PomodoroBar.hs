@@ -1,4 +1,3 @@
--- TODO press s repeatly not good
 -- TODO stuck at getchar sigINT handler
 -- TODO refractor CLI like move to display
 
@@ -66,18 +65,22 @@ myArguments = Argument
   <*> strOption
       ( long "cmdwork"
       <> metavar "COMMAND"
+      <> showDefault
+      <> value ""
       <> help "System command to execute when work session ends (e.g. \"xset dpms force off\")" )
   <*> strOption
       ( long "cmdbreak"
       <> metavar "COMMAND"
-      <> help "System command to execute when break session ends (without skipping)" )
+      <> showDefault
+      <> value ""
+      <> help "System command to execute when break session ends if not skip" )
   <*> switch
       ( long "raw"
-      <> help "show raw record (in minutes)")
+      <> help "show raw record in minutes")
   <*> switch
       ( long "record"
       <> short 'r'
-      <> help "show record with 25 minutes per session (adjust using -w option)")
+      <> help "show record during the last 4 weeks (adjust using -w option)")
   <*> switch
       ( long "version"
       <> short 'v'
