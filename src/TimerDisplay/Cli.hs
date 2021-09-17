@@ -1,14 +1,7 @@
-module Timer.Cli where
+module TimerDisplay.Cli where
 
 import System.Console.ANSI (clearLine, restoreCursor, saveCursor)
 import System.IO (hFlush, stdout)
-
-getDuration :: Char -> Int -> Int -> Int -> Int
-getDuration timerSessionCode w b l = case timerSessionCode of
-  'w' -> w * 60
-  'b' -> b * 60
-  'l' -> l * 60
-  _ -> 0
 
 getKeysHint :: Char -> String
 getKeysHint timerSessionCode = case timerSessionCode of
@@ -32,6 +25,6 @@ updateCli :: String -> IO ()
 updateCli text = do
   clearLine
   saveCursor
-  putStr text
+  putStr $ text ++ " "
   hFlush stdout
   restoreCursor

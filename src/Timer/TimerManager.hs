@@ -11,9 +11,9 @@ import System.Process (callCommand)
 
 import Common (getHHMMSS, loopUntilGetChars, sigIntInnerHandler)
 import Record.Record (addNewSessionToRecord)
-import Timer.Bar (ensureNamedPipesExist, updateBar)
-import Timer.Cli (getDuration, getKeysHint, getProgressBar, updateCli)
 import Timer.Timer (startTimer)
+import TimerDisplay.Bar (ensureNamedPipesExist, updateBar)
+import TimerDisplay.Cli (getKeysHint, getProgressBar, updateCli)
 
 startTimerManager :: Int -> Int -> Int -> Char -> String -> String -> IO ()
 startTimerManager w b l barType cmdW cmdB = do
@@ -27,7 +27,11 @@ startTimerManager w b l barType cmdW cmdB = do
       let sessionNumRem = ((sessionNum - 1) `rem` 8) + 1
       let timerSessionCode = getTimerSessionCode sessionNumRem
       let duration | sec > 0 = sec
-                   | otherwise = getDuration timerSessionCode w b l
+                   | otherwise = case timerSessionCode of
+                      'w' -> w * 60
+                      'b' -> b * 60
+                      'l' -> l * 60
+                      _ -> 0
       let progressBar = getProgressBar sessionNumRem
 
       when (sec == 0) (
@@ -42,10 +46,12 @@ startTimerManager w b l barType cmdW cmdB = do
       userChoice <- loopUntilGetChars ['q', 's']
       case userChoice of
         's' -> do
-          sub <- newEmptyMVar
-          _ <- installHandler sigINT (sigIntInnerHandler sub) Nothing
+          timerMVar <- newEmptyMVar
+          _ <- installHandler sigINT (sigIntInnerHandler timerMVar) Nothing
+
           let prefixBar = "[" ++ show sessionNumRem ++ "]"
-          secRemaining <- startTimer sub progressBar (getKeysHint timerSessionCode) prefixBar timerSessionCode barType duration
+          secRemaining <- startTimer timerMVar progressBar (getKeysHint timerSessionCode) prefixBar timerSessionCode barType duration
+
           when (secRemaining == 0 && timerSessionCode == 'w') (callCommand cmdW >> addNewSessionToRecord w)
           when (secRemaining == 0 && (timerSessionCode == 'b' || timerSessionCode == 'l')) (callCommand cmdB)
           let newSessionNum | secRemaining > 0 = sessionNum

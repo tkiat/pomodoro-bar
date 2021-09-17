@@ -18,11 +18,10 @@ library
                        PomodoroBar
                        Record.Date
                        Record.Record
-                       Timer.Bar
-                       Timer.Cli
-                       Timer.NamedPipe
                        Timer.Timer
                        Timer.TimerManager
+                       TimerDisplay.Bar
+                       TimerDisplay.Cli
   ghc-options:         -Wall -fno-warn-name-shadowing
   build-depends:       base >= 4.11 && < 5
                        , ansi-terminal

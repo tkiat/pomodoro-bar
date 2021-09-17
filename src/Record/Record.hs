@@ -85,14 +85,14 @@ addNewSessionToRecord w = do
         _ -> wk {_Sun = _Sun wk + min}
 
 showRecordLast4Weeks :: Int -> IO ()
-showRecordLast4Weeks workSessionMin = do
+showRecordLast4Weeks workMin = do
   d <- getDecodedRecord
   case d of
     Left err -> do
       path <- recordPath
       putStr $ path ++ " is not a valid JSON\n" ++ err
     Right rec -> do
-      putStr $ "Number of Sessions, " ++ show workSessionMin ++ " Minutes Each (Mon - Sun)\n"
+      putStr $ "Number of Sessions, " ++ show workMin ++ " Minutes Each (Mon - Sun)\n"
       putStr "This Week      : "
       searchAndShowWeek rec 1
       putStr "Last Week      : "
@@ -108,20 +108,20 @@ showRecordLast4Weeks workSessionMin = do
       case Map.lookup mon rec of
         Just wk ->
           case n of
-            1 -> offsetFromThisMonday >>= showWeek wk workSessionMin . (+) 1
-            _ -> showWeek wk workSessionMin 7
+            1 -> offsetFromThisMonday >>= showWeek wk workMin . (+) 1
+            _ -> showWeek wk workMin 7
         Nothing -> putStrLn "--- No Entry ---"
       where
         divideToOneDecimalDigit :: Int -> Int -> Double
         divideToOneDecimalDigit a b = fromInteger ((round :: Double -> Integer) (fromIntegral a/fromIntegral b * 10)) / 10.0
 
         showWeek :: Week -> Int -> Int -> IO ()
-        showWeek wk w n =
+        showWeek wk workMin numDays =
           let
             weekWorkloadFull = [_Mon wk , _Tue wk , _Wed wk , _Thu wk , _Fri wk , _Sat wk , _Sun wk]
-            weekWorkload = take n weekWorkloadFull
-            sessionWeek = [show $ divideToOneDecimalDigit x w| x <- weekWorkload]
-            avgPerDay = divideToOneDecimalDigit (sum weekWorkload) (w * length weekWorkload)
+            weekWorkload = take numDays weekWorkloadFull
+            sessionWeek = [show $ divideToOneDecimalDigit x workMin| x <- weekWorkload]
+            avgPerDay = divideToOneDecimalDigit (sum weekWorkload) (workMin * length weekWorkload)
           in
             putStrLn $ "[" ++ intercalate ", " sessionWeek ++ "] Avg: " ++ show avgPerDay
 

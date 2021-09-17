@@ -1,6 +1,3 @@
--- TODO stuck at getchar sigINT handler
--- TODO refractor CLI like move to display
-
 module PomodoroBar where
 
 import Options.Applicative
@@ -13,13 +10,13 @@ data Argument = Argument
   { work :: Int
   , break :: Int
   , longbreak :: Int
-  , cmdwork :: String
-  , cmdbreak :: String
+  , cw :: String
+  , cb :: String
+  , polybar :: Bool
+  , xmobar :: Bool
   , raw :: Bool
   , record :: Bool
   , version :: Bool
-  , polybar :: Bool
-  , xmobar :: Bool
   }
 
 pomodoroBar :: IO ()
@@ -27,16 +24,16 @@ pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs >> clearLine
   where
     opts = info (myArguments <**> helper)
       ( fullDesc
-     <> progDesc "Start a Pomodoro Timer with optional integration with xmobar and polybar"
+     <> progDesc "Start a Pomodoro Timer with optional integration with xmobar and polybar. The record file is at $XDG_DATA_HOME/pomodoro-bar/record.json"
      <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats" )
 
 parseArgs :: Argument -> IO ()
-parseArgs (Argument _ _ _ _  _  True _ _ _ _) = showRecordRaw
-parseArgs (Argument w _ _ _  _  False True _ _ _) = showRecordLast4Weeks w
-parseArgs (Argument _ _ _ _  _  False False True _ _) = showVersion
+parseArgs (Argument _ _ _ _  _ _ _  True _ _) = showRecordRaw
+parseArgs (Argument w _ _ _  _ _ _  False True _) = showRecordLast4Weeks w
+parseArgs (Argument _ _ _ _  _ _ _  False False True) = showVersion
 parseArgs (Argument w b l cw cb False False False False False) = startTimerManager w b l '-' cw cb
-parseArgs (Argument w b l cw cb False False False True False) = startTimerManager w b l 'p' cw cb
-parseArgs (Argument w b l cw cb False False False False True) = startTimerManager w b l 'm' cw cb
+parseArgs (Argument w b l cw cb True False False False False) = startTimerManager w b l 'p' cw cb
+parseArgs (Argument w b l cw cb False True False False False) = startTimerManager w b l 'm' cw cb
 parseArgs _ = return ()
 
 myArguments :: Parser Argument
@@ -44,36 +41,42 @@ myArguments = Argument
   <$> option auto
       ( long "work"
       <> short 'w'
-      <> help "work session length in minutes"
+      <> help "work duration in minutes"
       <> showDefault
       <> value 25
       <> metavar "INT")
   <*> option auto
       ( long "break"
       <> short 'b'
-      <> help "break session length in minutes"
+      <> help "break duration in minutes"
       <> showDefault
       <> value 5
       <> metavar "INT")
   <*> option auto
       ( long "longbreak"
       <> short 'l'
-      <> help "long break session length in minutes"
+      <> help "long break duration in minutes"
       <> showDefault
       <> value 15
       <> metavar "INT")
   <*> strOption
-      ( long "cmdwork"
+      ( long "cw"
       <> metavar "COMMAND"
       <> showDefault
       <> value ""
       <> help "System command to execute when work session ends (e.g. \"xset dpms force off\")" )
   <*> strOption
-      ( long "cmdbreak"
+      ( long "cb"
       <> metavar "COMMAND"
       <> showDefault
       <> value ""
       <> help "System command to execute when break session ends if not skip" )
+  <*> switch
+      ( long "polybar"
+      <> help "also update polybar (require additional settings)")
+  <*> switch
+      ( long "xmobar"
+      <> help "also update xmobar (require additional settings)")
   <*> switch
       ( long "raw"
       <> help "show raw record in minutes")
@@ -85,12 +88,6 @@ myArguments = Argument
       ( long "version"
       <> short 'v'
       <> help "show version")
-  <*> switch
-      ( long "polybar"
-      <> help "also update polybar (require additional settings)")
-  <*> switch
-      ( long "xmobar"
-      <> help "also update xmobar (require additional settings)")
 
 showVersion :: IO ()
 showVersion = putStrLn

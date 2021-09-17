@@ -12,7 +12,7 @@ A CLI pomorodo clock based on Haskell and nix. I made this because I couldn't fi
 
 ## What do you need?
 
-- Linux (I have't tested on other systems)
+- Linux (I have't tested on OSX, I don't think it works on Windows)
 - nix to install this app (optional but recommended)
 - System command(s) to notify you when session ends like `xset` or `espeak` (optional but recommended)
 
