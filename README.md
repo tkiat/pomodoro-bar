@@ -8,12 +8,12 @@ A CLI pomorodo clock based on Haskell and nix. I made this because I couldn't fi
 - Configurable session lengths
 - Report simple statistics in both raw and pretty formats
 - Run any system command when work and break sessions end
-- Have an integration with polybar and xmobar with distinctly different colors for active and passive sessions
+- Have an integration with polybar and xmobar with distinctly different colors for work and break sessions
 
 ## What do you need?
 
-- xset (this will force the screen to go black after session end)
-- nix (optional but recommended)
+- nix to install this app (optional but recommended)
+- System command(s) to notify you when session ends like `xset` or `espeak` (optional but recommended)
 
 ## How to Install
 
@@ -67,7 +67,7 @@ After this initial setup, you can restart the window manager or simply recompile
 
 ## Polybar integration (optional)
 
-### Make Named Pipes on Start (optional but recommended)
+### Make named pipes on start (optional but recommended)
 
 Same as xmobar section
 
