@@ -29,7 +29,7 @@ pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs >> clearLine
     opts = info (myArguments <**> helper)
       ( fullDesc
      <> progDesc "Start a Pomodoro Timer with optional integration with xmobar and polybar"
-     <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats for X Window System" )
+     <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats" )
 
 parseArgs :: Argument -> IO ()
 parseArgs (Argument _ _ _ _  _  True _ _ _ _) = showRecordRaw

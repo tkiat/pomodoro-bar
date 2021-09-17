@@ -2,7 +2,7 @@ cabal-version:       3.0
 name:                pomodoro-bar
 version:             0.1.0.0
 
-synopsis:            A pausable and configurable pomodoro timer with stats for X Window System.
+synopsis:            A pausable and configurable pomodoro timer with stats.
 license:             GPL-2.0-only
 
 author:              Theerawat Kiatdarakun
