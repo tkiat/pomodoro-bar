@@ -3,7 +3,10 @@ module Timer.TimerManager where
 import Control.Concurrent.MVar (newEmptyMVar)
 import Control.Monad (when)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, stdin)
+import System.Posix.IO (stdInput)
 import System.Posix.Signals (installHandler, sigINT)
+import System.Posix.Terminal (discardData, QueueSelector( InputQueue ), queryTerminal)
+import System.Posix.Types (Fd)
 import System.Process (callCommand)
 
 import Common (getHHMMSS, loopUntilGetChars, sigIntInnerHandler)
@@ -35,6 +38,7 @@ startTimerManager w b l barType cmdW cmdB = do
 
       updateCli $ progressBar ++ " " ++ getHHMMSS duration ++ " - " ++ getKeysHint 'i'
 
+      termFlush stdInput
       userChoice <- loopUntilGetChars ['q', 's']
       case userChoice of
         's' -> do
@@ -57,3 +61,9 @@ startTimerManager w b l barType cmdW cmdB = do
       | sessionNumRem `elem` [1, 3, 5, 7] = 'w'
       | sessionNumRem `elem` [2, 4, 6] = 'b'
       | otherwise = 'l'
+
+-- discard all inputs whose file descriptor is associated with a terminal
+termFlush :: Fd -> IO ()
+termFlush fd = do
+  isTerm <- queryTerminal fd
+  when isTerm $ discardData fd InputQueue
