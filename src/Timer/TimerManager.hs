@@ -1,15 +1,15 @@
 module Timer.TimerManager where
 
-import Control.Concurrent.MVar (newEmptyMVar)
+import Control.Concurrent.MVar (MVar, putMVar, newEmptyMVar)
 import Control.Monad (when)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, stdin)
 import System.Posix.IO (stdInput)
-import System.Posix.Signals (installHandler, sigINT)
+import System.Posix.Signals (Handler (CatchOnce), installHandler, sigINT)
 import System.Posix.Terminal (discardData, QueueSelector( InputQueue ), queryTerminal)
 import System.Posix.Types (Fd)
 import System.Process (callCommand)
 
-import Common (getHHMMSS, loopUntilGetChars, sigIntInnerHandler)
+import Common (getHHMMSS, loopUntilGetChars)
 import Record.Record (addNewSessionToRecord)
 import Timer.Timer (startTimer)
 import TimerDisplay.Bar (ensureNamedPipesExist, updateBar)
@@ -73,3 +73,7 @@ termFlush :: Fd -> IO ()
 termFlush fd = do
   isTerm <- queryTerminal fd
   when isTerm $ discardData fd InputQueue
+
+sigIntInnerHandler :: MVar () -> Handler
+sigIntInnerHandler v = CatchOnce $ do
+  putMVar v ()

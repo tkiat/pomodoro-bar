@@ -1,15 +1,13 @@
 module Common where
 
-import Control.Concurrent.MVar (MVar, putMVar)
-import System.Posix.Signals (Handler (CatchOnce))
-
 getHHMMSS :: Int -> String
 getHHMMSS sec =
   let
-    h' = quot sec 3600
+    m' = quot sec 60
+    h' = quot m' 60
     h | h' == 0 = ""
       | otherwise = getTwoDigits h' ++ ":"
-    m = getTwoDigits (quot sec 60)
+    m = getTwoDigits (m' `rem` 60)
     s = getTwoDigits (sec `rem` 60)
   in
     h ++ m ++ ":" ++ s
@@ -24,7 +22,3 @@ loopUntilGetChars charSet = do
   if ch `elem` charSet
     then return ch
     else loopUntilGetChars charSet
-
-sigIntInnerHandler :: MVar () -> Handler
-sigIntInnerHandler v = CatchOnce $ do
-  putMVar v ()
