@@ -1,5 +1,6 @@
 module Record.Date where
 
+import Data.Functor ((<&>))
 import Data.Time.Calendar (Day, addDays)
 import Data.Time.Calendar.OrdinalDate (mondayStartWeek)
 import Data.Time.Clock
@@ -9,7 +10,7 @@ todayLocal :: IO Day
 todayLocal = utctDay <$> (zonedTimeToUTC <$> getZonedTime)
 
 offsetFromThisMonday :: IO Int
-offsetFromThisMonday = todayLocal >>= pure . (+) (-1) . snd . mondayStartWeek
+offsetFromThisMonday = todayLocal <&> ((+) (- 1) . snd . mondayStartWeek)
 
 nthMondayUntilNowLocal' :: Integer -> IO Day
 nthMondayUntilNowLocal' n = do

@@ -2,7 +2,6 @@ module PomodoroBar where
 
 import Options.Applicative
 import Record.Record (ensureRecordExist, showRecordLast4Weeks, showRecordRaw)
-import System.Console.ANSI (clearLine)
 import Timer.TimerManager (startTimerManager)
 
 data Argument = Argument
