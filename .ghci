@@ -1,0 +1,12 @@
+:{
+:load
+  src/Common.hs
+  app/Main.hs
+  src/PomodoroBar.hs
+  src/Record/Date.hs
+  src/Record/Record.hs
+  src/Timer/Timer.hs
+  src/Timer/TimerManager.hs
+  src/TimerDisplay/Bar.hs
+  src/TimerDisplay/Cli.hs
+:}
