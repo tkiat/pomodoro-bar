@@ -1,16 +1,15 @@
 module Timer.TimerManager where
 
-import Control.Concurrent.MVar (MVar, putMVar, newEmptyMVar)
+import Common (getHHMMSS, loopUntilGetChars)
+import Control.Concurrent.MVar (MVar, newEmptyMVar, putMVar)
 import Control.Monad (when)
+import Record.Record (addNewSessionToRecord)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, stdin)
 import System.Posix.IO (stdInput)
 import System.Posix.Signals (Handler (CatchOnce), installHandler, sigINT)
-import System.Posix.Terminal (discardData, QueueSelector( InputQueue ), queryTerminal)
+import System.Posix.Terminal (QueueSelector (InputQueue), discardData, queryTerminal)
 import System.Posix.Types (Fd)
 import System.Process (callCommand)
-
-import Common (getHHMMSS, loopUntilGetChars)
-import Record.Record (addNewSessionToRecord)
 import Timer.Timer (startTimer)
 import TimerDisplay.Bar (ensureNamedPipesExist, updateBar)
 import TimerDisplay.Cli (getKeysHint, getProgressBar, updateCli)
@@ -26,18 +25,20 @@ startTimerManager w b l barType cmdW cmdB = do
     timerManager sessionNum w b l sec = do
       let sessionNumRem = ((sessionNum - 1) `rem` 8) + 1
       let timerSessionCode = getTimerSessionCode sessionNumRem
-      let duration | sec > 0 = sec
-                   | otherwise = case timerSessionCode of
-                      'w' -> w * 60
-                      'b' -> b * 60
-                      'l' -> l * 60
-                      _ -> 0
+      let duration
+            | sec > 0 = sec
+            | otherwise = case timerSessionCode of
+              'w' -> w * 60
+              'b' -> b * 60
+              'l' -> l * 60
+              _ -> 0
       let progressBar = getProgressBar sessionNumRem
 
-      when (sec == 0) (
-        if timerSessionCode == 'w'
-          then updateBar ("[" ++ show sessionNumRem ++ "]START") 'i' barType
-          else updateBar ("[" ++ show sessionNumRem ++ "]BREAK") 'i' barType
+      when
+        (sec == 0)
+        ( if timerSessionCode == 'w'
+            then updateBar ("[" ++ show sessionNumRem ++ "]START") 'i' barType
+            else updateBar ("[" ++ show sessionNumRem ++ "]BREAK") 'i' barType
         )
 
       updateCli $ progressBar ++ " " ++ getHHMMSS duration ++ " - " ++ getKeysHint 'i'
@@ -54,10 +55,12 @@ startTimerManager w b l barType cmdW cmdB = do
 
           when (secRemaining == 0 && timerSessionCode == 'w') (callCommand cmdW >> addNewSessionToRecord w)
           when (secRemaining == 0 && (timerSessionCode == 'b' || timerSessionCode == 'l')) (callCommand cmdB)
-          let newSessionNum | secRemaining > 0 = sessionNum
-                            | otherwise = sessionNum + 1
-          let newSecRemaining | secRemaining == (-1) = 0 -- (-1) means user skip break
-                              | otherwise = secRemaining
+          let newSessionNum
+                | secRemaining > 0 = sessionNum
+                | otherwise = sessionNum + 1
+          let newSecRemaining
+                | secRemaining == (-1) = 0 -- (-1) means user skip break
+                | otherwise = secRemaining
           timerManager newSessionNum w b l newSecRemaining
         _ -> do
           updateBar "POMODORO" 'i' barType

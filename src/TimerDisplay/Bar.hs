@@ -3,11 +3,11 @@ module TimerDisplay.Bar where
 import Control.Monad (when)
 import Data.Bits ((.|.))
 import System.Directory (doesFileExist, removeFile)
-import System.Exit (ExitCode ( ExitFailure ), exitWith)
+import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.Posix.Files (createNamedPipe, getFileStatus, isNamedPipe, namedPipeMode, unionFileModes)
 import System.Posix.Types (FileMode)
 
-data PipePaths = PipePaths { work :: FilePath, idle :: FilePath }
+data PipePaths = PipePaths {work :: FilePath, idle :: FilePath}
 
 ensureNamedPipesExist :: Char -> IO ()
 ensureNamedPipesExist barType = do
@@ -17,13 +17,15 @@ ensureNamedPipesExist barType = do
       let pathI = idle paths
       statusW <- getNamedPipeStatus pathW
       statusI <- getNamedPipeStatus pathI
-      when (statusW /= 'o' || statusI /= 'o') (
-        fixNamedPipe pathW statusW >>
-        fixNamedPipe pathI statusI >>
-        putStr "Please" >>
-        when (barType == 'm') (putStr " recompile xmobar and") >>
-        putStrLn " rerun" >>
-        exitWith (ExitFailure 1))
+      when
+        (statusW /= 'o' || statusI /= 'o')
+        ( fixNamedPipe pathW statusW
+            >> fixNamedPipe pathI statusI
+            >> putStr "Please"
+            >> when (barType == 'm') (putStr " recompile xmobar and")
+            >> putStrLn " rerun"
+            >> exitWith (ExitFailure 1)
+        )
     Nothing -> pure ()
 
 fixNamedPipe :: String -> Char -> IO ()
@@ -57,7 +59,7 @@ getNamedPipeStatus path = do
 
 getPipePaths :: Char -> Maybe PipePaths
 getPipePaths barType
-  | barType `elem` ['m', 'p'] = Just PipePaths { work = "/tmp/.pomodoro-bar-w", idle = "/tmp/.pomodoro-bar-i" }
+  | barType `elem` ['m', 'p'] = Just PipePaths {work = "/tmp/.pomodoro-bar-w", idle = "/tmp/.pomodoro-bar-i"}
   | otherwise = Nothing
 
 updateBar :: String -> Char -> Char -> IO ()

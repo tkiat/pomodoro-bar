@@ -2,7 +2,7 @@
 
 let
   sources = import ./nix/sources.nix;
-  pkgs = import sources.nixpkgs {};
+  pkgs = import sources.nixpkgs { };
 
   gitignore = pkgs.nix-gitignore.gitignoreSourcePure [ ./.gitignore ];
 
@@ -12,7 +12,7 @@ let
         hself.callCabal2nix
           "pomodoro-bar"
           (gitignore ./.)
-          {};
+          { };
     };
   };
 

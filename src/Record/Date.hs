@@ -1,8 +1,8 @@
 module Record.Date where
 
-import Data.Time.Clock
 import Data.Time.Calendar (Day, addDays)
 import Data.Time.Calendar.OrdinalDate (mondayStartWeek)
+import Data.Time.Clock
 import Data.Time.LocalTime (getZonedTime, zonedTimeToUTC)
 
 todayLocal :: IO Day

@@ -1,13 +1,12 @@
 module Timer.Timer where
 
+import Common (getHHMMSS)
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.MVar (MVar, tryTakeMVar)
-
 import TimerDisplay.Bar (updateBar)
 import TimerDisplay.Cli (updateCli)
-import Common (getHHMMSS)
 
-startTimer :: MVar() -> String -> String -> String -> Char -> Char -> Int -> IO Int
+startTimer :: MVar () -> String -> String -> String -> Char -> Char -> Int -> IO Int
 startTimer timerMVar prefixCli suffixCli prefixBar timerSessionCode barType sec = do
   let timerValue = getHHMMSS sec
 

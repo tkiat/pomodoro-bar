@@ -11,15 +11,14 @@ getKeysHint timerSessionCode = case timerSessionCode of
 
 getProgressBar :: Int -> String
 getProgressBar sessionNumRem =
-  let
-    original = "w-b-w-b-w-b-w-l"
-    indexLeft = 2 * (sessionNumRem - 1)
-    indexRight | sessionNumRem /= 8 = indexLeft
-               | otherwise = indexLeft + 1
-    (p1, p2and3) = splitAt indexLeft original
-    (p2, p3) = splitAt (indexRight - indexLeft + 1) p2and3
-  in
-    p1 ++ "[" ++ p2 ++ "]" ++ p3
+  let original = "w-b-w-b-w-b-w-l"
+      indexLeft = 2 * (sessionNumRem - 1)
+      indexRight
+        | sessionNumRem /= 8 = indexLeft
+        | otherwise = indexLeft + 1
+      (p1, p2and3) = splitAt indexLeft original
+      (p2, p3) = splitAt (indexRight - indexLeft + 1) p2and3
+   in p1 ++ "[" ++ p2 ++ "]" ++ p3
 
 updateCli :: String -> IO ()
 updateCli text = do
