@@ -1,0 +1,10 @@
+cradle:
+  cabal:
+    - path: "./Main.hs"
+      component: "pomodoro-bar:exe:pomodoro-bar"
+
+    - path: "src"
+      component: "lib:pomodoro-bar"
+
+    - path: "test"
+      component: "pomodoro-bar:test:pomodoro-bar-tests"

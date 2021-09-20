@@ -1,113 +1,70 @@
-module PomodoroBar where
+{-# LANGUAGE MultiWayIf #-}
 
-import Options.Applicative
-import Record.Record (ensureRecordExist, showRecordLast4Weeks, showRecordRaw)
-import Timer.TimerManager (startTimerManager)
+module PomodoroBar
+  ( parseArgs,
+    pomodoroBar,
+  )
+where
 
-data Argument = Argument
-  { work :: Int,
-    break :: Int,
-    longbreak :: Int,
-    cw :: String,
-    cb :: String,
-    polybar :: Bool,
-    xmobar :: Bool,
-    raw :: Bool,
-    record :: Bool,
-    version :: Bool
-  }
+import Control.Exception (bracket, finally)
+import Options.Applicative (execParser)
+import PomodoroBar.Argument.Option (CliOption (..), mkCliOptions)
+import PomodoroBar.Display (BarType, ensureNamedPipesExist, restoreBufferingAndEcho, setNoBufferingAndNoEcho, showVersion)
+import PomodoroBar.Record (ensureRecordExist, showRecordRaw, showRecordSummary)
+import PomodoroBar.Session (Session, TimerIdleStatus (ToBegin), mkCommand, mkSession, startSession)
+import PomodoroBar.Time (Minute, toSecond)
+import System.Console.ANSI (clearLine, hideCursor, showCursor)
+import System.Posix.Signals (Handler (Ignore), installHandler, sigTSTP)
+
+data UserChoice
+  = Pomodoro Minute Minute Minute Int String String BarType
+  | RecordRaw
+  | RecordSummary Minute Int
+  | Version
+
+execute :: UserChoice -> IO ()
+execute = \case
+  Pomodoro (toSecond -> w) (toSecond -> b) (toSecond -> l) s cw cb bt -> do
+    [cw', cb'] <- mapM mkCommand [cw, cb]
+    ensureNamedPipesExist bt
+    hideCursor
+    o <- setNoBufferingAndNoEcho
+    let sessions = map (mkSession w b l cw' cb') [(s * 2 - 1) ..]
+    bracket (setSigTSTP Ignore) setSigTSTP (\_ -> loop sessions)
+      `finally` (clearLine >> restoreBufferingAndEcho o >> showCursor)
+    where
+      loop :: [Session] -> IO ()
+      loop = mapM_ (startSession bt ToBegin 0)
+
+      setSigTSTP :: Handler -> IO Handler
+      setSigTSTP handler = installHandler sigTSTP handler Nothing
+  RecordRaw -> ensureRecordExist >> showRecordRaw
+  RecordSummary w n -> ensureRecordExist >> showRecordSummary w n
+  Version -> showVersion
+
+getUserChoice :: CliOption -> UserChoice
+getUserChoice
+  CliOption
+    { oWork = w,
+      oBreak = b,
+      oLongBreak = l,
+      oSessionNum = s,
+      oCmdWork = cw,
+      oCmdBreak = cb,
+      oBarType = bt,
+      oRecordRaw = rr,
+      oRecordSummary = rs,
+      oNumWeek = n,
+      oVersion = v
+    } =
+    if
+        | v -> Version
+        | rs -> RecordSummary w n
+        | rr -> RecordRaw
+        | otherwise -> Pomodoro w b l s cw cb bt
+
+parseArgs :: IO UserChoice
+parseArgs = getUserChoice <$> (mkCliOptions >>= execParser)
 
 pomodoroBar :: IO ()
-pomodoroBar = ensureRecordExist >> execParser opts >>= parseArgs
-  where
-    opts =
-      info
-        (myArguments <**> helper)
-        ( fullDesc
-            <> progDesc "Start a Pomodoro Timer. The record file is at $XDG_DATA_HOME/pomodoro-bar/record.json"
-            <> header "pomodoro-bar - A pausable and configurable Pomodoro Timer with stats"
-        )
-
-parseArgs :: Argument -> IO ()
-parseArgs (Argument _ _ _ _ _ _ _ True _ _) = showRecordRaw
-parseArgs (Argument w _ _ _ _ _ _ False True _) = showRecordLast4Weeks w
-parseArgs (Argument _ _ _ _ _ _ _ False False True) = showVersion
-parseArgs (Argument w b l cw cb False False False False False) = startTimerManager w b l '-' cw cb
-parseArgs (Argument w b l cw cb True False False False False) = startTimerManager w b l 'p' cw cb
-parseArgs (Argument w b l cw cb False True False False False) = startTimerManager w b l 'm' cw cb
-parseArgs _ = return ()
-
-myArguments :: Parser Argument
-myArguments =
-  Argument
-    <$> option
-      auto
-      ( long "work"
-          <> short 'w'
-          <> help "work duration in minutes"
-          <> showDefault
-          <> value 25
-          <> metavar "INT"
-      )
-    <*> option
-      auto
-      ( long "break"
-          <> short 'b'
-          <> help "break duration in minutes"
-          <> showDefault
-          <> value 5
-          <> metavar "INT"
-      )
-    <*> option
-      auto
-      ( long "longbreak"
-          <> short 'l'
-          <> help "long break duration in minutes"
-          <> showDefault
-          <> value 15
-          <> metavar "INT"
-      )
-    <*> strOption
-      ( long "cw"
-          <> metavar "COMMAND"
-          <> showDefault
-          <> value ""
-          <> help "System command to execute when work session ends (e.g. \"xset dpms force off\")"
-      )
-    <*> strOption
-      ( long "cb"
-          <> metavar "COMMAND"
-          <> showDefault
-          <> value ""
-          <> help "System command to execute when break session ends if not skip"
-      )
-    <*> switch
-      ( long "polybar"
-          <> help "also update polybar (require additional settings)"
-      )
-    <*> switch
-      ( long "xmobar"
-          <> help "also update xmobar (require additional settings)"
-      )
-    <*> switch
-      ( long "raw"
-          <> help "show raw record in minutes"
-      )
-    <*> switch
-      ( long "record"
-          <> short 'r'
-          <> help "show record during the last 4 weeks (adjust using -w option)"
-      )
-    <*> switch
-      ( long "version"
-          <> short 'v'
-          <> help "show version"
-      )
-
-showVersion :: IO ()
-showVersion =
-  putStrLn
-    "pomodoro-bar, version 0.1.0\n\
-    \\n\
-    \License (SPDX): GPL-2.0-only\n\
-    \Author: Theerawat Kiatdarakun"
+pomodoroBar = parseArgs >>= execute

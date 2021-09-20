@@ -1,12 +1,22 @@
+:set -XLambdaCase
+:set -XViewPatterns
 :{
 :load
-  src/Common.hs
-  app/Main.hs
   src/PomodoroBar.hs
-  src/Record/Date.hs
-  src/Record/Record.hs
-  src/Timer/Timer.hs
-  src/Timer/TimerManager.hs
-  src/TimerDisplay/Bar.hs
-  src/TimerDisplay/Cli.hs
+  src/PomodoroBar/Argument/Option.hs
+  src/PomodoroBar/Argument/Parser.hs
+  src/PomodoroBar/Display.hs
+  src/PomodoroBar/Display/Bar.hs
+  src/PomodoroBar/Display/Cli.hs
+  src/PomodoroBar/Display/Exception.hs
+  src/PomodoroBar/Session.hs
+  src/PomodoroBar/Session/Internal.hs
+  src/PomodoroBar/Session/Timer.hs
+  src/PomodoroBar/Record.hs
+  src/PomodoroBar/Record/Internal.hs
+  src/PomodoroBar/Time.hs
+  src/PomodoroBar/Time/Day.hs
+  src/PomodoroBar/Time/Second.hs
+  src/PomodoroBar/Time/Week.hs
 :}
+:show modules

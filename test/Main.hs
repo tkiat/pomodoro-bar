@@ -1,15 +1,20 @@
-{-# LANGUAGE TemplateHaskell #-}
-
+-- usage: cabal test
 module Main where
 
-import Hedgehog
-import Hedgehog.Main
--- import PomodoroBar
-
-prop_test :: Property
-prop_test = property $ do
-  "TODO" === "TODO"
---   doPomodoro === "Pomodoro"
+import Module.PomodoroBar (testUserChoice)
+import Module.Record (testRecord)
+import Module.Session (testSession)
+import Module.Time.Day (testTimeDay)
+import Module.Time.Second (testTimeSecond)
+import Module.Time.Week (testTimeWeek)
+import Module.Timer (testTimer)
 
 main :: IO ()
-main = defaultMain [checkParallel $$(discover)]
+main = do
+  testRecord
+  testSession
+  testTimeDay
+  testTimeSecond
+  testTimeWeek
+  testTimer
+  testUserChoice
